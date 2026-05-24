@@ -36,7 +36,7 @@ The companion framework reference is **[traction.wiki](https://traction.wiki)** 
 
    This repo ships `.claude/skills -> ../.agents/skills`, so Claude Code discovers all 12 EOS skills as native slash-commands (`/eos-run-level-10`, `/eos-bootstrap-business`, etc.) the moment you open this directory. No setup step required.
 
-   *(Optional: if you want the EOS skills available in any Claude Code session anywhere on your machine, not just inside this repo, run `./setup.sh` once. It symlinks each skill into `~/.claude/skills/` globally.)*
+   *(Optional: if you want the EOS skills available in any Claude Code session anywhere on your machine, not just inside this repo, run `bash scripts/install-global-skills.sh` once. If you maintain multiple EOS workspaces (one per business), pass a prefix: `bash scripts/install-global-skills.sh acme-` installs them as `/acme-eos-run-level-10`, etc. The `eos-bootstrap-business` skill offers this interactively at Day 0.)*
 
 5. **Run the bootstrap skill** to walk through Day 0 through Day 7:
 
@@ -61,7 +61,7 @@ your-business-eos-workspace/
 ├── BOOTSTRAP.md               # the First-90-Days checklist (eos-bootstrap-business reads this)
 ├── CLAUDE.md                  # points to AGENTS.md (Claude Code reads this first)
 ├── AGENTS.md                  # full operating instructions for any agent
-├── setup.sh                   # OPTIONAL: symlink eos-* skills into ~/.claude/skills/ for global discovery
+├── scripts/install-global-skills.sh  # OPTIONAL: symlink eos-* skills into ~/.claude/skills/ (with prefix support for multi-business operators)
 
 ├── .agents/skills/            # the 12 EOS skills (10 from traction-wiki + bootstrap + sync)
 ├── .claude/skills -> ../.agents/skills  # symlink so Claude Code auto-discovers project-local skills

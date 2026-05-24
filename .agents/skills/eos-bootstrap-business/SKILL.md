@@ -35,7 +35,24 @@ Before doing anything, check for `BOOTSTRAP-COMPLETE.md` at the repo root. If it
 
 3. **Confirm the operator has read `BOOTSTRAP.md`.** Ask out loud.
 
-4. **Interview for leadership team.** Ask:
+4. **Offer optional global skill install.** The repo already ships `.claude/skills -> ../.agents/skills`, so EOS skills work as slash-commands when the operator opens Claude Code IN THIS REPO. The optional next step is making them work globally (any Claude Code session anywhere on the machine).
+
+   Ask:
+
+   **"Want the EOS skills available as slash-commands from anywhere on your machine, not just when you are in this business folder?"**
+
+   If they say no: skip. Project-local discovery is enough for most operators.
+
+   If they say yes: ask the prefix question:
+
+   **"Do you have (or plan to have) other EOS workspaces — one per business you operate or advise? If yes, namespace this clone's skills with a prefix so they don't collide. For your only business, leave blank."**
+
+   - Single business: `bash scripts/install-global-skills.sh` (no prefix). Skills become `/eos-run-level-10`, `/eos-bootstrap-business`, etc.
+   - Multiple businesses: pick a short business-slug prefix. Run `bash scripts/install-global-skills.sh <prefix>`. Skills become `/<prefix>eos-run-level-10`, e.g., `/acme-eos-run-level-10`.
+
+   Confirm what got installed before continuing.
+
+5. **Interview for leadership team.** Ask:
 
    > "Who is on the leadership team? List names and current titles. We need this for the V/TO and Accountability Chart."
 
