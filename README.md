@@ -28,21 +28,17 @@ The companion framework reference is **[traction.wiki](https://traction.wiki)** 
    cd YOUR-BUSINESS-NAME
    ```
 
-4. **Install the skills as global slash-commands.** This symlinks every `eos-*` SKILL into `~/.claude/skills/` so Claude Code discovers them as native slash-commands (`/eos-run-level-10`, `/eos-rocks`, etc.):
-
-   ```bash
-   ./setup.sh
-   ```
-
-   Idempotent. Re-run any time. The script only touches `~/.claude/skills/`; the source files stay in this repo. (Skip this step if you prefer to invoke skills via `AGENTS.md` reference instead. Both work.)
-
-5. **Open in Claude Code** and start a session:
+4. **Open in Claude Code** and start a session:
 
    ```bash
    claude
    ```
 
-6. **Run the bootstrap skill** to walk through Day 0 through Day 7:
+   This repo ships `.claude/skills -> ../.agents/skills`, so Claude Code discovers all 12 EOS skills as native slash-commands (`/eos-run-level-10`, `/eos-bootstrap-business`, etc.) the moment you open this directory. No setup step required.
+
+   *(Optional: if you want the EOS skills available in any Claude Code session anywhere on your machine, not just inside this repo, run `./setup.sh` once. It symlinks each skill into `~/.claude/skills/` globally.)*
+
+5. **Run the bootstrap skill** to walk through Day 0 through Day 7:
 
    ```
    /eos-bootstrap-business
@@ -50,12 +46,12 @@ The companion framework reference is **[traction.wiki](https://traction.wiki)** 
 
    By the end of week 1, you have a signed-off V/TO, a complete Accountability Chart, a scheduled weekly L10, and a People Analyzer baseline.
 
-7. **From here, the rhythm:**
+6. **From here, the rhythm:**
    - **Weekly:** `/eos-run-level-10` for the L10.
    - **Quarterly:** `/eos-set-quarterly-rocks` and `/eos-people-analyzer` at the off-site.
    - **Annually:** `/eos-update-vto` at the annual planning day.
 
-8. **Turn on hourly auto-sync** so your work is backed up to GitHub: `bash scripts/install-sync-cron.sh`
+7. **Turn on hourly auto-sync** so your work is backed up to GitHub: `bash scripts/install-sync-cron.sh`
 
 ## Repo Layout
 
@@ -65,9 +61,10 @@ your-business-eos-workspace/
 ├── BOOTSTRAP.md               # the First-90-Days checklist (eos-bootstrap-business reads this)
 ├── CLAUDE.md                  # points to AGENTS.md (Claude Code reads this first)
 ├── AGENTS.md                  # full operating instructions for any agent
-├── setup.sh                   # symlinks .agents/skills/eos-* into ~/.claude/skills/
+├── setup.sh                   # OPTIONAL: symlink eos-* skills into ~/.claude/skills/ for global discovery
 
 ├── .agents/skills/            # the 12 EOS skills (10 from traction-wiki + bootstrap + sync)
+├── .claude/skills -> ../.agents/skills  # symlink so Claude Code auto-discovers project-local skills
 
 ├── scripts/
 │   ├── sync.sh                # git sync helper

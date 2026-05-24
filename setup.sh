@@ -1,9 +1,16 @@
 #!/usr/bin/env bash
-# eos-business-workspace-template setup
-# Symlinks the 12 EOS skill folders into ~/.claude/skills/ so Claude Code can
-# discover them as native slash-commands (/eos-run-level-10, /eos-rocks, etc.).
+# eos-business-workspace-template — OPTIONAL global install
 #
-# Idempotent. Re-run any time to refresh symlinks.
+# This repo already ships .claude/skills -> ../.agents/skills, so opening
+# Claude Code IN THIS REPO discovers all 12 EOS skills as native slash-commands
+# (/eos-run-level-10, /eos-bootstrap-business, etc.) WITHOUT running this script.
+#
+# Run this script ONLY if you want the EOS skills available GLOBALLY (anywhere
+# on your machine, including outside this repo). It symlinks each eos-* skill
+# into ~/.claude/skills/, making them available in any Claude Code session
+# regardless of cwd.
+#
+# Idempotent. Re-run any time to refresh.
 #
 # Usage:
 #   ./setup.sh             Install skill symlinks
@@ -120,7 +127,7 @@ install() {
   echo "  /eos-quarterly-conversation-prep"
   echo "  /eos-update-vto"
   echo "  /eos-business-health-snapshot"
-  echo "  /sync-with-upstream"
+  echo "  /eos-sync-with-upstream"
 }
 
 case "${1:-install}" in
