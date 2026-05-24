@@ -1,0 +1,16 @@
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor noise
+.vscode/
+.idea/
+*.swp
+*~
+
+# Sync log (created by scripts/sync.sh)
+.workspace-sync.log
+
+# Local environment
+.env
+.env.local
