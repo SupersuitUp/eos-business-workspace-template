@@ -3,6 +3,21 @@ name: eos-run-level-10
 description: Run an EOS Level 10 Meeting. Agent acts as Facilitator and Scribe combined. Walks the leadership team (or department team) through the 7-segment agenda, captures To-Dos and Issues live, ends with a meeting rating. Use when the operator says "let's run the L10", "run our Level 10", "weekly leadership meeting", or invokes /eos-run-level-10. Expects access to the operator's V/TO file, current Scorecard, current Rocks, prior week's L10 notes, and current Issues List.
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>eos-run-level-10` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/eos-run-level-10" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-eos-run-level-10` → pick the symlink named `acme-eos-run-level-10`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # Run an EOS Level 10 Meeting
 
 The Level 10 Meeting is the weekly heartbeat of any EOS-run business. 90 minutes. 7 segments. Same day, same time, every week.

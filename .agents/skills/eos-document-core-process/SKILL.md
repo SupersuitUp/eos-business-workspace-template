@@ -3,6 +3,21 @@ name: eos-document-core-process
 description: Document one Core Process using the Three-Step Process Documenter. Agent interviews the subject-matter expert, captures 7-15 steps with decision points and hand-offs, tests the draft with an outsider, refines based on every place the outsider got stuck, and compresses to a one-page visual. Use when the operator says "document our sales process", "write up the customer onboarding flow", "core process documentation", "process documenter", or invokes /eos-document-core-process. Expects access to the Accountability Chart (to identify the owning function head) and any prior version of this process.
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>eos-document-core-process` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/eos-document-core-process" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-eos-document-core-process` → pick the symlink named `acme-eos-document-core-process`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # Document Core Process
 
 Every company has 6-10 Core Processes: sales, marketing, operations, customer service, HR, finance, plus 1-3 industry-specific ones. Most companies have none of them documented. The people closest to the work hold the steps in their heads, hand-offs leak, new hires guess, and the company runs on tribal knowledge.

@@ -3,6 +3,21 @@ name: sync-with-upstream
 description: Pull the latest updates from the upstream EOS Business Workspace Template (new skills, refined SKILL files, updated artifact templates, refreshed docs) into this workspace without disturbing the operator's filled-in business data. Use when the operator says "sync with upstream", "pull template updates", "get the latest from the template", or any similar phrasing.
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>sync-with-upstream` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/sync-with-upstream" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-sync-with-upstream` → pick the symlink named `acme-sync-with-upstream`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # Sync With Upstream
 
 Pull updates from the upstream `SupersuitUp/eos-business-workspace-template` into this workspace. Leave the operator's filled-in business data untouched.

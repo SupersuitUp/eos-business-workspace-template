@@ -3,6 +3,21 @@ name: eos-people-analyzer
 description: Run the People Analyzer on a team. Agent scores every person on Core Values alignment (+, +/−, −) and GWC (Get it, Want it, Capacity), sets The Bar explicitly, places each person in one of four quadrants, and writes the 30/60/90-day action plan for anyone below The Bar. Use when the operator says "run the people analyzer", "score the team", "people analyzer round", "check right person / right seat", or invokes /eos-people-analyzer. Expects access to the V/TO (for Core Values) and the Accountability Chart (for seats in scope).
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>eos-people-analyzer` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/eos-people-analyzer" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-eos-people-analyzer` → pick the symlink named `acme-eos-people-analyzer`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # Run the People Analyzer
 
 The People Analyzer is the most uncomfortable tool in the EOS toolkit. It is also the most clarifying. Most leadership teams discover, the first time they run it, that they have been avoiding a People conversation for months or years.

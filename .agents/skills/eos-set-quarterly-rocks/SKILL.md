@@ -3,6 +3,21 @@ name: eos-set-quarterly-rocks
 description: Set quarterly Rocks for a leader or a leadership team. Agent interviews each leader, drafts 1-3 SMART Rocks aligned to the 1-Year Plan, pressure-tests each Rock against the SMART criteria, and produces the quarterly Rocks artifact. Use when the operator says "let's set Rocks", "quarterly rock setting", "Q1 rocks", or invokes /eos-set-quarterly-rocks. Expects access to the operator's V/TO file (for the 1-Year Plan) and prior quarter's Rocks.
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>eos-set-quarterly-rocks` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/eos-set-quarterly-rocks" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-eos-set-quarterly-rocks` → pick the symlink named `acme-eos-set-quarterly-rocks`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # Set Quarterly Rocks
 
 Rocks are 1-3 SMART 90-day priorities per person. This skill turns the agent into the Rocks-setting interviewer. The agent walks each leader through proposing Rocks, validates them against the SMART criteria, and pressure-tests them against the 1-Year Plan.

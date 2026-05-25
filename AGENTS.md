@@ -44,7 +44,10 @@ Twelve skills, all in `.agents/skills/`:
 - **Every artifact has a deterministic path.** The skills know exactly where to write. Do not rename files or move them.
 - **Do not auto-resolve disagreements.** When the leadership team disagrees on something (Core Values, a Rock owner, a People Analyzer score), surface the disagreement as an Issue. Let the team work through it. Your job is to drive the process, not pick the answer.
 - **Do not skip bootstrap.** If `BOOTSTRAP-COMPLETE.md` does not exist, the first thing to do is run `eos-bootstrap-business`. Other skills will work, but the workspace state is unreliable until bootstrap is done.
-- **Do not push to a public repo.** Before writing any business state, verify `gh repo view --json visibility` returns "PRIVATE". If it returns "PUBLIC", halt.
+- **Do not write business state into a public repo.** Determine the workspace's git shape: run `git rev-parse --show-toplevel` from the workspace root and compare to the workspace root.
+  - If equal (standalone fork), verify `gh repo view --json visibility | jq -r .visibility` returns `"PRIVATE"`. Halt on `"PUBLIC"`.
+  - If different (nested inside a parent repo), verify the parent repo is private — `gh repo view "$REPO_TOP" --json visibility` if a GitHub remote exists, otherwise ask the operator out loud. Halt on `"PUBLIC"` or on `"n"`.
+  - If no git repo is found, halt — EOS state must live inside a tracked, private repo.
 
 ## When the Operator Asks Something Ambiguous
 

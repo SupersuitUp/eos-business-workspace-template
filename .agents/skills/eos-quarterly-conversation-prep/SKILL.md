@@ -3,6 +3,21 @@ name: eos-quarterly-conversation-prep
 description: Prepare a manager for a 60-minute Quarterly Conversation with one direct report. Agent runs a mental People Analyzer on the direct report (Core Values + GWC), reviews last quarter's Rocks and Measurables, surfaces the 1-2 specific pieces of feedback that need to land, and produces a one-page brief the manager walks in with. Use when the operator says "prep me for my Q conversation with X", "Quarterly Conversation prep", "I have a 1-on-1 tomorrow with my direct report", or invokes /eos-quarterly-conversation-prep. Expects access to the V/TO, Accountability Chart, latest People Analyzer round, and the direct report's Rocks history.
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>eos-quarterly-conversation-prep` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/eos-quarterly-conversation-prep" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-eos-quarterly-conversation-prep` → pick the symlink named `acme-eos-quarterly-conversation-prep`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # Quarterly Conversation Prep
 
 The Quarterly Conversation is the People Component's connection ritual: a 60-minute informal manager-direct-report 1-on-1 every 90 days. Two prompts, both directions: *what's working*, *what's not*. No PowerPoint. No formal evaluation form. The conversation is the artifact.

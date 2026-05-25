@@ -3,6 +3,21 @@ name: eos-design-scorecard
 description: Design a company or department Scorecard. Agent runs the workshop, surfaces candidate metrics from each leader, pressure-tests every candidate against the six-question filter, sets owners and weekly goals, and writes the 13-week tracking template. Use when the operator says "build the scorecard", "design a scorecard", "we need a scorecard", "set up our weekly metrics", or invokes /eos-design-scorecard. Expects access to the operator's V/TO file (for the 1-Year Plan) and any prior Scorecard.
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>eos-design-scorecard` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/eos-design-scorecard" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-eos-design-scorecard` → pick the symlink named `acme-eos-design-scorecard`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # Design Scorecard
 
 The Scorecard is the Data Component's master tool: 5-15 weekly activity-based leading indicators with owners, goals, and 13 weeks of history. It is what ends opinion-based arguments about whether the business is healthy. The team looks at the Scorecard, sees on track or off track per metric, and moves on.

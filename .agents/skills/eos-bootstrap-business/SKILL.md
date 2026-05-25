@@ -3,6 +3,21 @@ name: eos-bootstrap-business
 description: One-shot orchestrator that walks a new operator through their first week running EOS in this workspace. Calls eos-update-vto (Day 1-2), eos-build-accountability-chart (Day 3-4), schedules the first Level 10 Meeting (Day 5), and runs the first eos-people-analyzer round (Day 6-7). Writes BOOTSTRAP-COMPLETE.md when done; refuses to re-run after that file exists. Use when the operator says "let's set up the business", "bootstrap the business", "first day with EOS", or invokes /eos-bootstrap-business. Expects a freshly-forked private repo (not the public template).
 ---
 
+> **Workspace root.** Every relative path in this SKILL.md (`vto.md`, `accountability-chart.md`, `issues-list.md`, `BOOTSTRAP.md`, `BOOTSTRAP-COMPLETE.md`, `meeting-notes/`, `rocks/`, `scorecards/`, `people-analyzer/`, `processes/`, `quarterly-conversations/`, `snapshots/`, `.agents/skills/`, `scripts/`) is resolved against the EOS workspace root — the directory that contains `BOOTSTRAP.md`, `AGENTS.md`, and `.agents/skills/`. Before doing anything else, find that directory and `cd` into it. Do not write artifacts to the operator's current working directory if it isn't the workspace root.
+>
+> Discovery, in order:
+>
+> 1. **cwd test.** If `./BOOTSTRAP.md` and `./.agents/skills/` both exist, cwd IS the workspace root. Done.
+> 2. **Global-install lookup.** Otherwise the skill was invoked globally via a `~/.claude/skills/<prefix>eos-bootstrap-business` symlink. Resolve the workspace root with:
+>    ```bash
+>    LINK=$(find -L ~/.claude/skills -maxdepth 1 -type l -lname "*/.agents/skills/eos-bootstrap-business" 2>/dev/null | head -1)
+>    [ -n "$LINK" ] && WORKSPACE_ROOT=$(cd "$(readlink -f "$LINK")/../../.." && pwd)
+>    ```
+> 3. **Multi-workspace tiebreak.** If step 2 finds multiple symlinks (operator runs more than one EOS workspace), match the slash-command prefix the operator just used. Example: `/acme-eos-bootstrap-business` → pick the symlink named `acme-eos-bootstrap-business`. If you can't tell, ask the operator which workspace to run against.
+> 4. **No workspace found.** Halt and tell the operator to `cd` into their EOS workspace, or to run `bash scripts/install-global-skills.sh [prefix]` from inside that workspace to register it for global invocation.
+>
+> Then `cd "$WORKSPACE_ROOT"` and proceed with the rest of this skill.
+
 # eos-bootstrap-business
 
 The one-shot first-week orchestrator. Run once per business. Calls the other EOS skills in sequence. Produces a fully-set-up workspace: V/TO, Accountability Chart, first L10 scheduled, first People Analyzer baseline.
@@ -25,17 +40,36 @@ Before doing anything, check for `BOOTSTRAP-COMPLETE.md` at the repo root. If it
 
 ### Day 0: Welcome + visibility check
 
-1. **Confirm the repo is named for the operator's business.** Run `gh repo view --json name | jq -r .name`. If the name is still "eos-business-workspace-template", halt and instruct the operator to rename via `gh repo rename <their-business-name>`.
-
-2. **Confirm the repo is PRIVATE.** Run `gh repo view --json visibility | jq -r .visibility`. If "PUBLIC", halt and instruct the operator to change visibility before continuing:
+1. **Detect the repo shape.** From the workspace root, run `git rev-parse --show-toplevel` to find the enclosing git repo, then compare:
 
    ```bash
-   gh repo edit --visibility private --accept-visibility-change-consequences
+   REPO_TOP=$(git rev-parse --show-toplevel 2>/dev/null)
+   if [ "$REPO_TOP" = "$WORKSPACE_ROOT" ]; then
+     SHAPE=standalone   # workspace IS its own git repo (a direct fork of the template)
+   elif [ -n "$REPO_TOP" ]; then
+     SHAPE=nested       # workspace lives inside a larger parent git repo
+   else
+     SHAPE=untracked    # workspace is not in any git repo
+   fi
    ```
 
-3. **Confirm the operator has read `BOOTSTRAP.md`.** Ask out loud.
+2. **Standalone fork → check name + visibility via `gh`.** If `SHAPE=standalone`:
+   - `gh repo view --json name | jq -r .name` must NOT be `"eos-business-workspace-template"`. If it still is, halt and tell the operator to rename: `gh repo rename <their-business-name>`.
+   - `gh repo view --json visibility | jq -r .visibility` must be `"PRIVATE"`. If `"PUBLIC"`, halt and instruct:
+     ```bash
+     gh repo edit --visibility private --accept-visibility-change-consequences
+     ```
 
-4. **Offer optional global skill install.** The repo already ships `.claude/skills -> ../.agents/skills`, so EOS skills work as slash-commands when the operator opens Claude Code IN THIS REPO. The optional next step is making them work globally (any Claude Code session anywhere on the machine).
+3. **Nested workspace → verify the parent repo is private.** If `SHAPE=nested`:
+   - Run `gh repo view "$REPO_TOP" --json visibility,name 2>/dev/null | jq -r '"\(.name) (\(.visibility))"'`. If `gh` can resolve the parent, confirm visibility is `PRIVATE`. If `PUBLIC`, halt — EOS business data must never land in a public repo.
+   - If `gh` cannot resolve the parent (no GitHub remote, or remote is on a different host), ask the operator out loud: *"This workspace is nested inside `<REPO_TOP>`. Is that repository private and access-controlled? (y/n)"* Halt on "n". Proceed on "y".
+   - No name check is required for nested workspaces — the workspace folder name (e.g. `eos/` inside a parent like `<parent-org-repo>/<business-name>/`) carries the entity context.
+
+4. **Untracked workspace → halt.** If `SHAPE=untracked`, halt and tell the operator the workspace must live inside a private git repo (either a fork of this template, or a folder inside a larger private repo).
+
+5. **Confirm the operator has read `BOOTSTRAP.md`.** Ask out loud.
+
+6. **Offer optional global skill install.** The repo already ships `.claude/skills -> ../.agents/skills`, so EOS skills work as slash-commands when the operator opens Claude Code IN THIS REPO. The optional next step is making them work globally (any Claude Code session anywhere on the machine).
 
    Ask:
 
@@ -52,7 +86,7 @@ Before doing anything, check for `BOOTSTRAP-COMPLETE.md` at the repo root. If it
 
    Confirm what got installed before continuing.
 
-5. **Interview for leadership team.** Ask:
+7. **Interview for leadership team.** Ask:
 
    > "Who is on the leadership team? List names and current titles. We need this for the V/TO and Accountability Chart."
 
