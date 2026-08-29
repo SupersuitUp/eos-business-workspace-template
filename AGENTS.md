@@ -61,5 +61,5 @@ Default behavior order:
 
 - Not a project management tool. The Issues List is deliberately minimal.
 - Not a CRM. Customer data lives elsewhere.
-- Not a personal productivity workspace. For that, see `personal-agentic-os-workspace-template` (a separate Jarvis template).
+- Not a personal productivity workspace. For that, see `freedom-workspace-template` (a separate Jarvis template).
 - Not a deployed site. This is local markdown the operator's harness reads and writes.
